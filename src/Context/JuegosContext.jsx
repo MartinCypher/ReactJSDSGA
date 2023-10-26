@@ -1,40 +1,33 @@
-import React, {createContext} from "react";
-import {db} from "../ConfigFirebase/Config";
+import React, { createContext, useEffect, useState } from "react";
+import { db } from "../ConfigFirebase/Config";
 
 export const JuesgosContext = createContext();
 
-export class JuesgosContextProvider extends React.Component{
-    
-    state={
-        products:[]
-    }
-    componentDidMount(){
-        const prevProductos = this.state.products;
-        db.collection("Juegos").onSnapshot(snapshot=>{
-            let changes = snapshot.docChanges();
-            changes.forEach(change=>{
-                if(change.type==="added"){
-                    prevProductos.push({
-                        JuegoID: change.doc.id,
-                        NombreJuego: change.doc.data().NombreJuego,
-                        PrecioJuego: change.doc.data().PrecioJuego,
-                        CaratulaJuego: change.doc.data().CaratulaJuego,
+const JuesgosContextProvider = ({ children }) => {
+  const [products, setProducts] = useState([]);
 
-                    })
-                }
-                this.setState({
-                    products: prevProductos
-                })
+  useEffect(() => {
+    const fetchData = async () => {
+      const snapshot = await db.collection("Juegos").get();
 
-            })
-        })
-    }
+      const newProducts = snapshot.docs.map((doc) => ({
+        JuegoID: doc.id,
+        NombreJuego: doc.data().NombreJuego,
+        PrecioJuego: doc.data().PrecioJuego,
+        CaratulaJuego: doc.data().CaratulaJuego,
+      }));
 
-    render(){
-        return(
-            <JuesgosContext.Provider value={{products:[...this.state.products]}}>
-                {this.props.children}
-            </JuesgosContext.Provider>
-        )    
-    }
-}
+      setProducts(newProducts);
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <JuesgosContext.Provider value={{ products }}>
+      {children}
+    </JuesgosContext.Provider>
+  );
+};
+
+export default JuesgosContextProvider;

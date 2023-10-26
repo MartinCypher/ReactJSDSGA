@@ -1,55 +1,59 @@
-import React, { Component } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './Components/Home';
 import AñadirJuegos from './Components/AñadirJuegos';
-import { JuesgosContextProvider } from './Context/JuegosContext';
+import JuesgosContextProvider  from './Context/JuegosContext';
 import Registrarse from './Components/Registrarse';
 import IniciarSesion from './Components/IniciarSesion';
-import { auth,db } from './ConfigFirebase/Config';
+import { auth, db } from './ConfigFirebase/Config';
+import { CarritoContextProvider } from './Context/CarritoContext';
 
-export class App extends Component {
+const App = () => {
+  const [user, setUser] = useState(null);
 
-  state={
-    user: null
-  }
-
-  componentDidMount(){
-    auth.onAuthStateChanged(user=>{
-      if(user){
-        /*Prof aca busque todos los posibles resultados para corregir este error no encuentra mis docs firebase nose que hacer */
-        db.collection("UsuariosRegistradosData").doc(user.uid).get().then(snapshot =>{
-          this.setState({
-            Usuario: snapshot.data().Usuario
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        db.collection('UsuariosRegistradosData')
+          .doc(user.uid)
+          .get()
+          .then(snapshot => {
+            debugger
+            setUser({
+              Usuario: snapshot.data().Usuario,
+            });
           })
-        })
+          .catch(error => {
+            console.error('Error getting document:', error);
+          });
+      } else {
+        setUser(null);
       }
-      else{
-        this.setState({
-          user:null
-        })
-      }
-    })
-  }
+    });
 
+    return () => unsubscribe(); 
+  }, []); 
 
+  return (
+    <div>
+      <JuesgosContextProvider>
+        <CarritoContextProvider>
+          <Router>
+            <Routes>
+              <Route path='AñadirProductos' element={<AñadirJuegos />} />
+              <Route
+                exact
+                path='/'
+                element={<Home user={user} />}
+              />
+              <Route path='/signup' element={<Registrarse />} />
+              <Route path='/login' element={<IniciarSesion />} />
+            </Routes>
+          </Router>
+        </CarritoContextProvider>
+      </JuesgosContextProvider>
+    </div>
+  );
+};
 
-  render() {
-    return (
-      <div>
-        <JuesgosContextProvider>
-          <BrowserRouter>
-          <Routes>
-            <Route path='AñadirProductos' Component={AñadirJuegos}/>
-            <Route exact path='/' Component={()=><Home user={this.state.user}></Home>}/>
-            <Route path='/singup' Component={Registrarse}/>
-            <Route path='/login' Component={IniciarSesion}/>
-          </Routes>
-          </BrowserRouter>
-        </JuesgosContextProvider>
-        
-      </div>
-    )
-  }
-}
-
-export default App
+export default App;
