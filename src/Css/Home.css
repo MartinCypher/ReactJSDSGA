@@ -36,7 +36,27 @@
     color: black;
     font-weight: 600;
     margin: auto 10px;
-    
+}
+
+.navbox .rightside .relative{
+     position: relative;
+}
+
+.navbox .rightside .relative  .no-of-products {
+    background: #f57224;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    position: absolute;
+    top: -5px;
+    right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 h1 {

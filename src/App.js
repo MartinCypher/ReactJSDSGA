@@ -7,6 +7,10 @@ import Registrarse from './Components/Registrarse';
 import IniciarSesion from './Components/IniciarSesion';
 import { auth, db } from './ConfigFirebase/Config';
 import { CarritoContextProvider } from './Context/CarritoContext';
+import Carrito from './Components/Carrito';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faCartShopping, faPlus, faMinus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import FinalizarCompra from './Components/FinalizarCompra';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -14,14 +18,12 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
-        db.collection('UsuariosRegistradosData')
+        db.collection('UsuariosRegistradosData ')
           .doc(user.uid)
           .get()
           .then(snapshot => {
-            debugger
-            setUser({
-              Usuario: snapshot.data().Usuario,
-            });
+            console.log(snapshot.data(), snapshot.exists)
+            setUser(snapshot.data().Usuario);
           })
           .catch(error => {
             console.error('Error getting document:', error);
@@ -48,6 +50,8 @@ const App = () => {
               />
               <Route path='/signup' element={<Registrarse />} />
               <Route path='/login' element={<IniciarSesion />} />
+              <Route path='/juegosCarrito' element={<Carrito user={user}/>}/>
+              <Route path='/finalizarcompra' element={<FinalizarCompra user={user}/>}/>
             </Routes>
           </Router>
         </CarritoContextProvider>
@@ -55,5 +59,7 @@ const App = () => {
     </div>
   );
 };
+
+library.add(faCartShopping, faPlus, faMinus, faTrash)
 
 export default App;

@@ -1,12 +1,16 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Link } from 'react-router-dom'
 import logo from "../Images/Digital Skull Games Argentina2.png"
-import { Icon } from 'react-icons-kit'
-import { cart } from 'react-icons-kit/entypo/cart'
 import { useNavigate } from 'react-router-dom'
 import { auth } from '../ConfigFirebase/Config'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCartShopping } from '@fortawesome/free-solid-svg-icons'
+import { CarritoContext } from '../Context/CarritoContext'
+
 
 const NavBar = ({user}) => {
+
+  const {cantidad} = useContext(CarritoContext);
   
   const navigate = useNavigate();
 
@@ -30,7 +34,10 @@ const NavBar = ({user}) => {
         {/* si tenemos un usuario logeado */}
         {user && <div className='rightside'>
           <span><Link to="/" className='navlinks'>{user}</Link></span>
-          <span><Link to="cartproducts" className='navlinks'><Icon icon={cart}/></Link></span>
+          <span><Link to="/juegoscarrito" className='navlinks'><FontAwesomeIcon icon={faCartShopping}/></Link></span>
+          <div className='relative'>
+            <span className='no-of-products'>{cantidad}</span>
+          </div>
           <span><button className='logout-btn' onClick={logout}>Desconectarse</button></span>
         </div>}
 
